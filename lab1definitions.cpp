@@ -4,10 +4,11 @@
 #include "lab1declarations.h"
 
 
-
+// Мне нравится, что ты выделил это в отдельную вспомогательную функцию.
 int calculateRowSize(BMPHeader header) {
     int bytesPerPixel = header.bitsPerPixel / 8;
-    int rowSizeBytes = (header.width * bytesPerPixel + 3) & ~3;
+    // Какой страшный способ посчитать с подкладкой. Наверняка же можно и без побитовых операций...
+    int rowSizeBytes = (header.width * bytesPerPixel + 3) & ~3; 
     return rowSizeBytes;
 }
 
@@ -19,7 +20,7 @@ BMP readBMP(std::string filename) {
         throw std::runtime_error("Unable to open the BMP file for reading.");
     }
 
-    inputFile.read((char*)(&image.header), sizeof(BMPHeader));
+    inputFile.read((char*)(&image.header), sizeof(BMPHeader)); // приведения в стиле Си мощная, но опасная вещь. Чекни плюсовые
 
     int bytesToSkip = image.header.dataOffset - sizeof(BMPHeader);
 
@@ -65,6 +66,7 @@ BMP rotateClockwise(BMP image) {
     int bpp = image.header.bitsPerPixel / 8;
 
     newImage.header = image.header;
+    /* Ну эт жуть. Просто надо было std::swap на них */
     newImage.header.width += newImage.header.height;
     newImage.header.height = newImage.header.width - newImage.header.height;
     newImage.header.width -= newImage.header.height;
@@ -74,7 +76,9 @@ BMP rotateClockwise(BMP image) {
 
     newImage.header.fileSize = sizeof(BMPHeader) + newRowSize * newImage.header.height;
     newImage.header.dataSize = newRowSize * newImage.header.height;
-
+    /* Вот тут еще одна проблема подхода с обычной структурой. Кто-то вне этого кода должен позаботиться
+     * о удалении данных. В классе ты бы мог написать деструктор, который бы сам удалял эти данные
+     */
     newImage.pixels = new unsigned char[newImage.header.dataSize];
 
     for (int x = 0; x < newImage.header.height; x++) {
@@ -146,7 +150,7 @@ void applyGaussianBlur(BMP& image, double sigma) {
     }
 
     BMP blurredImage = image;
-
+    /* Довольно сильная вложенность. Возможно, стоит задуматься о разбиении на функции или хотя бы просто как-то разбить */
     for (int y = 0; y < image.header.height; y++) {
         for (int x = 0; x < image.header.width; x++) {
             std::vector<double> colorChannels(bpp, 0.0);
