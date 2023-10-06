@@ -2,13 +2,17 @@
 #include "lab1declarations.h"
 
 int main() {
+    /* На самом деле обработка исключений и вообще их использование -- спорный топик. 
+     * Например в код стайле гугла они вовсе запрещены. Однако я тоже считаю, что в этой
+     * программе они смотрятся хорошо. Но просто ради самообразования почитай в интернетике,
+     * чем они могут быть плохи (но плюсов у них точно больше) */
     try {
         BMP image = readBMP("test1.bmp");
 
         BMP rotatedImageRight = rotateClockwise(image);
         writeBMP("outputRight.bmp", rotatedImageRight);
         delete[] rotatedImageRight.pixels;
-        rotatedImageRight.pixels = nullptr;
+        rotatedImageRight.pixels = nullptr; //Очень хорошо
         std::cout << "Image rotated 90 degrees clockwise and saved as outputRight.bmp." << std::endl;
 
         BMP rotatedImageLeft = rotateCounterclockwise(image);
